@@ -1,296 +1,706 @@
-# ASM_Cours
-Cours de Langage d'Assembleur.
+# 🧠 Cours d’Assembleur (ASM) — x86 / x86_64
 
-## Pre-Requis
+Cours **complet, détaillé et exhaustif** de langage assembleur pour apprentissage, reverse engineering, CTF et exploitation.
 
-1. [installation des packages]
-sudo apt install nasm
-sudo apt install binutils
+---
 
-ou pour telecharger tout les essentiels
-sudo apt install build-essential\
+# 📦 1. Installation des outils
 
-Mettre a jour
+## 🛠️ Packages essentiels
+
+```bash
 sudo apt update
+sudo apt install nasm binutils build-essential gdb
+```
 
-2. [Comande d'Execution]
-    Pour Architecture 64 bits
-nasm -f elf64 a64.asm -o a64.o
-ld a64.o -o a64
+### 🔍 Outils importants en plus
 
-    Pour architecture 32 bits
-nasm -f elf32 a32.asm -o a32.o
-ld a64.o -o a64
-Si vous etes sur une architecture 64 mais que vous voulais quand meme le tester
-ld -m elf_i386 a32.o -o a32
+* objdump (analyse binaire)
+* strace (syscalls)
+* ltrace (libc calls)
+* gdb-peda / pwndbg (debug avancé)
+* ghidra (reverse engineering)
+* radare2
 
-# Structure d'un programme
-etiquette/label: pour etre utiliser par notre lien
-Instruction, valeur de destination, valeur source
-ou
-Instruction, valeur operande
+````
 
-<etiquette>:
-    <instruction> <operande(s)>
-    <instruction> <operande(s)>
-    <instruction> <operande(s)>
-    <instruction> <operande(s)>
+---
 
-# Macros
+# ⚙️ 2. Compilation et exécution
 
-%define hello 'Hello World !'
-%assign hello 'Hello World !'
-%include 'other.asm'
+## 🧬 64 bits
+```bash
+nasm -g dwarf2 -f elf64 file.asm -o file.o
+ld file.o -o file
+./file
+````
 
-# Directive 
+## 🧬 32 bits
 
-message_length equ $-message
-example times 25 resb 1 (reserve 1 octet 25 fois)
+```bash
+nasm -f elf32 file.asm -o file.o
+ld -m elf_i386 file.o -o file
+./file
+```
 
-# Processor data sizes
-Byte b		= 1-byte,	8 bits		0:255		-128:+127
-Word w		= 2-bytes,	16 bits		0:65,535	-32,768:+32,767
-Doubleword d	= 4-bytes,	32 bits		0:4,294,967,295	−2,147,483,648:+2,147,483,647
-Quadword q	= 8-bytes,	64 bits		0: 2^64-1	-(2^63):2^63-1
-Paragraph p	= 16-bytes,	128 bits 	0:2^128-1	-(2^127):2^127-1
-Kilobyte Kb	= 1024 bytes
-Megabyte Mb	= 1,048,576 bytes
+---
 
-# Declaration map
-char		Byte		8-bits		1 byte
-short		Word		16-bits		2 bytes		
-int		Double-word	32-bits		4 bytes
-unsigned int	Double-word	32-bits		4 bytes
-long		Quadword	64-bits		8 bytes
-long long	Quadword	64-bits		8 bytes
-char *		Quadword	64-bits		8 bytes
-int *		Quadword	64-bits		8 bytes
-float		Double-word	32-bits		4 bytes
-double		Quadword	64-bits		8 bytes
+# 🧱 3. Structure d’un programme ASM
 
-# Registre
-Architecture		64-bits	| 32-bits | 16-bits | 8-bits hight | 8-bits low
+Un programme est divisé en 3 sections :
 
-Accumulateur		RAX	 EAX 	   AX	     AH		     AL
-Base			RBX	 EBX	   BX	     BH		     BL
-Compteur		RCX	 ECX	   CX	     CH		     CL
-Donnees			RDX	 EDX	   DX	     DH		     DL
-Indice source		RSI	 ESI	   SI			     SIL
-Indice Destination	RDI	 EDI	   DI			     DIL
-Pointeur pile		RSP	 ES	   SP			     SPL
-Pointeur base		RBP	 EBP	   BP			     BPL
-registre general	r8	 r8d	   r8w			     r8b
-registre general	r9	 r9d	   r9w			     r9b
-registre general	...	 ...	   ...			     ...
-registre general	r15	 r15d	   r15w			     r15b
-Instruct Pointer Reg	RIP
+```asm
+section .data   ; données initialisées
+section .bss    ; variables non initialisées
+section .text   ; code
+    global _start
+_start:
+```
 
-63          31      15   7    0
--------------------------------
-|		    |	AX    |
-|RAX        |EAX    | AH | AL |
--------------------------------
+---
 
-1. Registre D'Etat (rflags)
-Le registre rflags contients des informations concernant le resultat d'execution d'une instruction.
-Le registre est mis a jour par le CPU apres chaque instruction, et n'est pas directement
-accessible  par le programme, Le registre stock l'information du status de l'instruction
-qui a ete executee.
-Certains bits du registre appeles drapeaux ont une signification particuliere.
+# ✍️ 4. Syntaxe générale
 
-Bits 	63..32 	31	30	29	28	27	26 	25 	24 	23 	22 	
-Drapeaux - 	-   	- 	- 	- 	- 	- 	- 	- 	- 	- 
+```asm
+label:
+    instruction destination, source ; commentaire
+```
 
-Bits	 21 	20 	19 	18 	17 	16 	15 	14 	13..12 	11 	10 	9
-Drapeaux ID 	VIP 	VIF 	AC 	VM 	RF 	0 	NT 	IOPL 	OF 	DF 	IF
+### Exemple
 
-Bits	 8 	7 	6 	5 	4 	3 	2 	1 	0
-Drapeaux TF 	SF 	ZF 	0 	AF 	0 	PF 	1 	CF
+```asm
+mov rax, rbx
+```
 
-OF DF IF TF SF ZF AF PF CF
+---
 
-Nom	Symbol	Bit	Utilisation
-Carry	CF	0	Arme si une op arithm entiere non signee génère une retenue (debordement)
- -   			sur le bit le plus significatif. Aussi utilisé pour l'arithm en precision
- - 			multiple.
+# 🧠 5. REGISTRES (x86_64 COMPLET)
 
-Parity	PF	2	Armé si l'octet de poids faible du rés généré après une op arithm contient
- -			un nombre pair de bits à 1.
+## 🔹 Registres principaux
 
-Adjust	AF	4	Armé si le résultat d'une op arithm génère un résultat provoquant une retenue
- -			sur le troisième bit. Ce drapeau n'est utile que dans l'utilisation du codage BCD
+| Registre | Nom                 | Rôle réel                |
+| -------- | ------------------- | ------------------------ |
+| RAX      | accumulator         | retour fonction / calcul |
+| RBX      | base                | stockage général         |
+| RCX      | counter             | boucles                  |
+| RDX      | data                | opérations / syscalls    |
+| RSI      | source              | pointeur source          |
+| RDI      | destination         | pointeur destination     |
+| RSP      | stack pointer       | sommet de la pile        |
+| RBP      | base pointer        | repère stack frame       |
+| RIP      | instruction pointer | instruction courante     |
 
-Zero	ZF	6	Armé si le résultat d'une opération arithmétique vaut zéro.
+## 🔹 Registres étendus
 
-Sign	SF	7	Armé si le résultat d'une opération arithmétique possède un bit de poids fort
- - 			 1, indiquant ainsi un nombre signé négatif. (desarme si res positif).
+```text
+r8  → r15 : registres généraux supplémentaires
+```
 
-Direction DF	10	Specifie la direction de l'operation (inc ou dec) de certaines lignes d'op.
+## 🔹 Découpage des registres
 
-Overflow OF	11	Armé si le résultat constitue un nombre positif ou négatif ne pouvant tenir dans
- - 			l'opérande de destination. (pour les ops signee sur entiers).
+| 64 bits | 32 bits | 16 bits | 8 bits  |
+| ------- | ------- | ------- | ------- |
+| RAX     | EAX     | AX      | AL / AH |
+| RBX     | EBX     | BX      | BL / BH |
+| RCX     | ECX     | CX      | CL / CH |
+| RDX     | EDX     | DX      | DL / DH |
 
-Registre n16:
-r15 q(quadruple word) = 64 bits -> double
-r15 d(double word) = 32 bits -> float
-r15 w(word) = 16 bits
-r15 b(byte) = 8 bits
+---
 
-t -> precision etendu
-o
-y -> YMM
-z -> ZMM
+# 📊 6. STACK (PILE)
 
-2. Registre de segment
-Code Segment CS
-Data Segment DS
-Stack Segment SS
-Extra Segment ES
-(...)
+## 🔁 Principe LIFO
 
-Registre precis
-511         255       127     0
--------------------------------
-|ZMM        |YMM      |XMM    |
--------------------------------
+* push → empile (RSP -= 8)
+* pop → dépile (RSP += 8)
 
-convension d'appel sous intel x86_64:
-6 premiers
-entier		: rdi, rsi, rdx, rcx, r8, r9, pile (droite -> gauche)
-retour fonction	: rax(accumulateur) (64 bits) ou rax + rdx (128 bits)
+```asm
+push rax
+pop rbx
+```
 
-flotant		: XMM0 à XMM7 (Y pour 256 bits et Z pour 512 bits)
-retour fonction	: XMM0 et XMM1 (Y pour 256 bits et Z pour 512 bits)
+## 📍 RSP
 
-Architecture ARM pour telephone
-MIPS (playstation portable)
+* pointe le sommet
+* change en permanence
 
-Docs
-Instruction Set Architecture ISA
-Architecture Overview
-Reference manual
+---
 
-# Basic Synthax
-An assembly program can be divide into 3 sections
+# 🧱 7. STACK FRAME (TRÈS IMPORTANT)
 
-1. data section
-Utiliser pour declarer des donnees ou contantes initialiser.
-Les donnees ne change pas lors du lancement du programme.
-type de donnees -> (const valeurs, nom_de_fichier, taile_buffer)
-	
-	section.data
+```asm
+push rbp
+mov rbp, rsp
+sub rsp, 32
+```
 
-2. bss section
-Utiliser pour declarer des variables.
-	
-	section.bss
+### 📌 rôle :
 
-3. text section
-Utiliser pour ecrire la partie du code. Cette section doit commencer avec la declaration: 
-	global _start
-Qui dit ou programme que l'execution commence.
-	
-	section.text
-		global _start
-	_start:
+* RBP = repère fixe
+* RSP = variable
 
-4. Syntax du langage assembleur
+---
 
-[label] mnemonic [operands] [;comment]
+# 📍 8. OFFSETS MÉMOIRE
 
-# Directives de donnees
-d{X} <valeur>	->	dans le segment .data
-			donnees initialisees
-res{X} <valeur>	->	dans le segment .bss
-			donnees non initialisees
-X depend de la taille des donnes:
-	b: 1 octet (byte)
-	w: 1 mot (word)
-	d: 2 mots (double word)
-	q: 4 mots (quadruple word)
-	t: 10 octets
+```text
+[rbp + 16] → argument 2
+[rbp + 8 ] → argument 1
+[rbp + 0 ] → ancien rbp
+[rbp - 8 ] → variable locale
+[rbp - 16] → variable locale
+```
 
-# Instructions de deplacement de donnees
+👉 Offset = distance depuis rbp ou rsp
 
-mov	dest, src
-mov	taille dest, src
-movzx	dest, src	extension avec des 0 dans dest
-movsx	dest, src	extension avec le bit de signe dans dest
+---
 
-lea	dest, [op]	dest <- adresse de op (load effective address)
-push	op		decremente rsp et empile op
-pop	op		depile dans op et incremente rsp
+# 🧠 9. MÉMOIRE & TYPES
 
-# La pile
+| Type C | ASM   | Taille  |
+| ------ | ----- | ------- |
+| char   | byte  | 8 bits  |
+| short  | word  | 16 bits |
+| int    | dword | 32 bits |
+| long   | qword | 64 bits |
 
-Last-in First-out
-push ajoute une donnees sur la pile de taille qword au sommet de la pile
-pop retire la donnee de taille qword au sommet de la pile
-Le registre rsp contient l'adresse de la donnee qui se trouve au sommet de la pile
-push decremente rsp de 8
-pop incremente de 8
+---
 
-#  Prefix et Suffixe des bases numeriques
+# 📦 10. DÉCLARATION MÉMOIRE
 
-d ou t : decimal ---> 5, 05, 0150d, 0d150
-q ou o : octal ---> 755q, 0q755
-b ou y : binaire ---> 0b11011101, 0b1101_1101, 1101_1100b
-h ou x : hexa ---> 0xA5, 0A5h
+## DATA (initialisé)
 
-# Instructions arithmetiques
+```asm
+db 1
+rw 2
+ dd 4
+ dq 8
+```
 
-add	op1, op2			op1 <- op1 + op2
-adc(avec une retenue)
-sub	op1, op2			op1 <- op1 + op2
-sbb(avec une retenue)
-of(si retenue signee)
-cf(si retenue non signee)
-neg	reg				reg <- -reg
-inc	reg				reg <- reg + 1
-dec	reg				reg <- reg - 1
-imul	op (signe ou mul non signe)	rdx:rax <- rax * op
-imul	dest, op			dest <- dest * op
-imul	dest, op, immediat		dest <- op * immediat
-idiv	op (div non signe)		rax <- rdx:rax / op, rdx <- rdx:rax mod op 2 (mod op au carre)
+## BSS (non initialisé)
 
-and	op1, op2			op1 <- op1 & op2
-or	op1, op2			op1 <- op1 | op2
-xor	op1, op2			op1 <- op1 ˆ op2
-not	reg				reg <- ˜reg
-shl	reg, immediat			reg <- reg << immediat
-shr	reg, immediat			reg <- reg >> immediat
-sal	reg, immediat			reg <- reg << immediat
-sar	reg, immediat			reg <- reg >> immediat signe
-rol	reg, immediat			reg <- reg decalageCirculaireGaucheDe imm
-ror	reg, immediat			reg <- reg decalageCirculaireDroiteDe imm
-rcl	reg, immediat			reg : CF <- reg : CF decalageCircGauchede imm
-rcr	reg, immediat			reg : CF <- reg : CF decalageCircDroitede imm
+```asm
+resb 64
+resq 1
+```
 
-cmp	op1, op2			calcul de op1 − op2 (comparaison) et de ZF,CF et OF
-jmp	op				branchement (saut) inconditionnel a l’adresse op
-jz	op				branchement a l’adresse op si ZF=1
-jnz	op				branchement a l’adresse op si ZF=0
-jo	op				branchement a l’adresse op si OF=1
-jno	op				branchement a l’adresse op si OF=0
-js	op				branchement a l’adresse op si SF=1
-jns	op				branchement a l’adresse op si SF=0
-jc	op				branchement a l’adresse op si CF=1
-jnc	op				branchement a l’adresse op si CF=0
-jp	op				branchement a l’adresse op si PF=1
-jnp	op				branchement a l’adresse op si PF=0
+---
 
-Signees (int): 
-je	op				branchement a l’adresse op si op1 = op2
-jne	op				branchement a l’adresse op si op1 != op2
-jl	op (jnge)			branchement a l’adresse op si op1 < op2
-jle	op (jng)			branchement a l’adresse op si op1 ≤ op2
-jg	op (jnle)			branchement a l’adresse op si op1 > op2
-jge	op (jnl)			branchement a l’adresse op si op1 ≥ op2
-Non signees (uint):
-je	op				branchement a l’adresse op si op1 = op2
-jne	op				branchement a l’adresse op si op1 != op2
-jb	op (jnae)			branchement a l’adresse op si op1 < op2
-jbe	op (jna)			branchement a l’adresse op si op1 ≤ op2
-ja	op (jnbe)			branchement a l’adresse op si op1 > op2
-jae	op (jnb)			branchement a l’adresse op si op1 ≥ op2
+# 🔁 11. MOV / TRANSFERT
+
+```asm
+mov dest, src
+movzx dest, src   ; zero extension
+movsx dest, src   ; sign extension
+lea rax, [addr]   ; charge adresse
+```
+
+---
+
+# ⚙️ 12. INSTRUCTIONS ARITHMÉTIQUES (COMPLÈTES)
+
+## ➕ Addition / soustraction
+
+```asm
+add  op1, op2    ; op1 = op1 + op2
+adc  op1, op2    ; op1 = op1 + op2 + CF (carry)
+
+sub  op1, op2    ; op1 = op1 - op2
+sbb  op1, op2    ; op1 = op1 - op2 - CF
+```
+
+👉 Flags affectés : CF, ZF, SF, OF
+
+---
+
+## ➖ Incrément / décrément
+
+```asm
+inc reg   ; reg = reg + 1
+dec reg   ; reg = reg - 1
+neg reg   ; reg = -reg (complément à 2)
+```
+
+---
+
+## ✖️ Multiplication
+
+```asm
+imul op              ; RDX:RAX = RAX * op
+imul dest, op        ; dest = dest * op
+imul dest, op, imm   ; dest = op * imm
+```
+
+👉 Note :
+
+* version 1 → résultat étendu sur 128 bits (RDX:RAX)
+
+---
+
+## ➗ Division
+
+```asm
+idiv op
+```
+
+👉 fonctionnement :
+
+* quotient → RAX
+* reste → RDX
+* dividende = RDX:RAX
+
+⚠️ IMPORTANT : RDX doit être correctement initialisé (souvent 0)
+
+---
+
+## 🔗 Opérations logiques
+
+```asm
+and op1, op2   ; ET binaire
+or  op1, op2   ; OU binaire
+xor op1, op2   ; OU exclusif
+not reg        ; inversion bits
+```
+
+---
+
+## 🔁 Décalages (shifts)
+
+```asm
+shl reg, imm   ; shift gauche (x2)
+shr reg, imm   ; shift droite logique
+sal reg, imm   ; identique shl
+sar reg, imm   ; shift droite arithmétique (garde signe)
+```
+
+👉 sar conserve le signe (très important)
+
+---
+
+## 🔄 Rotations
+
+```asm
+rol reg, imm   ; rotation gauche
+ror reg, imm   ; rotation droite
+rcl reg, imm   ; rotation via CF (carry flag)
+rcr reg, imm   ; rotation via CF
+```
+
+---
+
+# 🔀 13. COMPARAISONS & SAUTS
+
+## 📊 cmp (base de tous les jumps conditionnels)
+
+```asm
+cmp op1, op2   ; calcule op1 - op2 sans stocker résultat
+```
+
+👉 met à jour les FLAGS : ZF, CF, SF, OF
+
+---
+
+## 🚦 Sauts inconditionnels
+
+```asm
+jmp label
+```
+
+👉 saute toujours
+
+---
+
+## 🚦 Sauts basés sur FLAGS (généraux)
+
+```asm
+jz   label   ; ZF = 1
+jnz  label   ; ZF = 0
+
+jo   label   ; OF = 1
+jno  label   ; OF = 0
+
+js   label   ; SF = 1
+jns  label   ; SF = 0
+
+jc   label   ; CF = 1
+jnc  label   ; CF = 0
+
+jp   label   ; PF = 1
+jnp  label   ; PF = 0
+```
+
+---
+
+## 📌 Sauts SIGNÉS (int)
+
+```asm
+je   label   ; égal
+jne  label   ; différent
+
+jl   label   ; <  (signed)
+jle  label   ; <= (signed)
+jg   label   ; >  (signed)
+jge  label   ; >= (signed)
+```
+
+👉 basés sur SF et OF
+
+---
+
+## 📌 Sauts NON SIGNÉS (uint)
+
+```asm
+je   label   ; égal
+jne  label   ; différent
+
+jb   label   ; <  (carry)
+jbe  label   ; <=
+ja   label   ; >
+jae  label   ; >=
+```
+
+👉 basés sur CF
+
+--- LOGIQUE
+
+```asm
+and, or, xor, not
+shl, shr
+sar
+rol, ror
+```
+
+---
+
+# 🔄 14. COMPARAISONS
+
+```asm
+cmp a, b
+je / jne
+jg / jl
+ja / jb
+jge / jle
+```
+
+---
+
+# 🚦 15. FLAGS (RFLAGS)
+
+| Flag | Signification |
+| ---- | ------------- |
+| ZF   | zero          |
+| CF   | carry         |
+| SF   | sign          |
+| OF   | overflow      |
+| PF   | parity        |
+| AF   | adjust        |
+| DF   | direction     |
+
+👉 mis à jour automatiquement par le CPU
+
+---
+
+# 📞 16. APPELS DE FONCTIONS (ABI Linux x86_64)
+
+## Arguments
+
+```text
+rdi, rsi, rdx, rcx, r8, r9
+```
+
+## Retour
+
+```text
+rax
+```
+
+---
+
+# ⚠️ 17. SYSCALLS
+
+```asm
+mov rax, 60   ; exit
+mov rdi, 0
+syscall
+```
+
+---
+
+# 🧪 18. MACROS
+
+```asm
+%define VALUE 10
+%include "file.asm"
+%assign X 5
+```
+
+---
+
+# 🔢 19. BASES NUMÉRIQUES
+
+```text
+décimal : 10
+hex : 0xA
+binaire : 0b1010
+octal : 0q12
+```
+
+---
+
+# ⚡ 20. ALIGNEMENT MÉMOIRE (CRITIQUE)
+
+👉 Stack DOIT être alignée 16 bytes avant call
+
+```asm
+and rsp, -16
+```
+
+---
+
+# 🧠 21. MOVZX vs MOVSX
+
+* movzx → zero extension (unsigned)
+* movsx → sign extension (signed)
+
+---
+
+# 🔍 22. DEBUG / REVERSE
+
+Outils :
+
+* GDB
+* Ghidra
+* Radare2
+
+👉 Analyse :
+
+* stack
+* registers
+* offsets
+
+---
+
+# 💣 23. CONCEPTS CRITIQUES
+
+* stack descend
+* RSP change toujours
+* RBP = repère fixe
+* registres = variables temporaires
+* mémoire non protégée
+
+---
+
+# 🔥 24. CONVENTIONS IMPORTANTES
+
+## SysV ABI
+
+* arguments dans registres
+* retour dans RAX
+
+## Stack
+
+* push/pop = 8 bytes
+
+---
+
+# 💥 25. CTF / EXPLOITATION
+
+* buffer overflow = dépassement stack
+* RIP = contrôle exécution
+* offset = distance jusqu’à RIP
+
+---
+
+# 🧠 26. 🧪 EXEMPLES CONCRETS (C ↔ ASM)
+
+## ➕ Addition simple
+
+### C
+
+```c
+int a = 5 + 3;
+```
+
+### ASM
+
+```asm
+mov eax, 5
+add eax, 3
+```
+
+👉 Flags :
+
+* CF = 0
+* ZF = 0
+
+---
+
+## 🔁 Condition if
+
+### C
+
+```c
+if (a == b)
+    x = 1;
+```
+
+### ASM
+
+```asm
+cmp rax, rbx
+je equal
+```
+
+👉 Explication :
+
+* cmp = rax - rbx
+* si ZF = 1 → jump
+
+---
+
+## 🔄 Boucle for
+
+### C
+
+```c
+for (i = 0; i < 5; i++) {}
+```
+
+### ASM
+
+```asm
+mov ecx, 5
+loop_start:
+    dec ecx
+    jnz loop_start
+```
+
+👉 ECX = compteur
+
+---
+
+# ⚠️ 27. PIÈGES TRÈS IMPORTANTS (CTF / REVERSE)
+
+## 💣 Signed vs Unsigned
+
+```asm
+cmp rax, rbx
+jl label   ; SIGNÉ
+jb label   ; NON SIGNÉ
+```
+
+👉 ERREUR CLASSIQUE :
+
+* utiliser jl au lieu de jb → bug logique
+
+---
+
+## 💣 Overflow invisible
+
+```asm
+add al, 1
+```
+
+👉 problème :
+
+* AL = 8 bits
+* dépassement silencieux
+
+CF peut être activé
+
+---
+
+## 💣 mov vs movzx
+
+```asm
+mov al, [rdi]
+movzx eax, byte [rdi]
+```
+
+👉 danger :
+
+* mov laisse les bits hauts sales
+* movzx nettoie
+
+---
+
+## 💣 stack corruption
+
+```asm
+sub rsp, 8
+```
+
+👉 si mal aligné :
+
+* crash syscall
+* segfault movaps
+
+---
+
+## 💣 écrasement RIP
+
+Buffer overflow :
+
+```text
+buffer → saved rbp → return address (RIP)
+```
+
+👉 objectif CTF : contrôler RIP
+
+---
+
+# 🔬 28. IMPACT FLAGS (TRÈS IMPORTANT)
+
+## ➕ add
+
+* CF : carry
+* ZF : zéro
+* OF : overflow signé
+
+## ➖ sub / cmp
+
+* CF : borrow
+* ZF : égalité
+* SF : signe
+* OF : overflow signé
+
+---
+
+# 🧠 29. MODÈLE MENTAL CPU
+
+👉 Le CPU fait toujours :
+
+```text
+fetch → decode → execute → update flags → next RIP
+```
+
+---
+
+# 💣 30. COMMENT LES JUMPS RÉELLEMENT FONCTIONNENT
+
+```asm
+cmp rax, rbx
+je label
+```
+
+👉 équivalent CPU :
+
+```text
+tmp = rax - rbx
+if (tmp == 0) RIP = label
+```
+
+---
+
+# 🔥 31. POURQUOI C’EST CRITIQUE EN EXPLOITATION
+
+* contrôler FLAGS = contrôler flux
+* contrôler RIP = exécuter code
+* stack = mémoire vulnérable
+
+---
+
+# 🧠 FIN
+
+👉 Objectif : comprendre EXACTEMENT comment le CPU exécute un programme.
 
