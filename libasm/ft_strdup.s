@@ -14,7 +14,7 @@ ft_strdup:
 	call ft_strlen
 	inc rax
 	mov rdi, rax
-	call malloc
+	call malloc wrt ..plt
 	test rax, rax
 	jz .malloc_failed
 	
@@ -24,7 +24,7 @@ ft_strdup:
 	ret
 
 .malloc_failed:
-	call __errno_location
+	call __errno_location wrt ..plt
 	mov dword [rax], 12
 	mov rax, 0
 	ret
