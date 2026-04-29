@@ -13,7 +13,7 @@ NASMFLAGS	= -f elf64
 
 CC = gcc
 
-CFLAGS = -Wall -Werror -Wextra -no-pie
+CFLAGS = -Wall -Werror -Wextra
 
 TEST = test
 
