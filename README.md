@@ -76,6 +76,26 @@ mov rax, rbx
 
 # 🧠 5. REGISTRES (x86_64 COMPLET)
 
+📞 Appel de fonction et registres (x86_64 - System V ABI)
+
+Quand une fonction est appelée en assembleur (Linux x86_64), les arguments ne sont pas sur la stack au début (contrairement au 32 bits).
+
+👉 Ils sont passés dans des registres spécifiques.
+
+## 🔹 Convention d’appel (System V ABI)
+
+📥 Passage des arguments
+
+| Argument C | Registre |
+| ---------- | -------- |
+| 1er        | `rdi`    |
+| 2e         | `rsi`    |
+| 3e         | `rdx`    |
+| 4e         | `rcx`    |
+| 5e         | `r8`     |
+| 6e         | `r9`     |
+
+👉 À partir du 7e argument, ça passe sur la stack
 ## 🔹 Registres principaux
 
 | Registre | Nom                 | Rôle réel                |
