@@ -7,6 +7,12 @@ SRCS	=	ft_strlen.s \
 
 OBJS	=	${SRCS:.s=.o}
 
+BONUS_SRCS	=	ft_list_push_front.s \
+							ft_list_size.s \
+							ft_list_remove_if
+
+BONUS_OBJS	=	${BONUS_SRCS:.s=.o}
+
 NASM	= nasm
 
 NASMFLAGS	= -f elf64
@@ -17,6 +23,8 @@ CFLAGS = -Wall -Werror -Wextra
 
 TEST = test
 
+TEST_BONUS = test_bonus
+
 NAME	=	libasm.a
 
 all:	${NAME}
@@ -25,17 +33,23 @@ ${NAME}:	${OBJS}
 					ar rcs ${NAME} ${OBJS}
 
 %.o: %.s
-	$(NASM) $(NASMFLAGS) $< -o $@
+	${NASM} ${NASMFLAGS} $< -o $@
 
 clean:
 				rm -f ${OBJS}
 
 fclean:	clean
-				rm -f ${NAME}
-				rm -f ${TEST}
+				rm -f ${NAME} ${TEST} ${TEST_BONUS}
 
 re:	fclean all
 
-$(TEST): $(NAME) main.c
-	$(CC) $(CFLAGS) main.c -L. -lasm -o $(TEST)
-	./$(TEST) < Makefile
+test:	${NAME} main.c
+					${CC} ${CFLAGS} main.c -L. -lasm -o ${TEST}
+					./${TEST} < Makefile
+
+bonus:	${OBJS} ${BOUNS_OBJS}
+				ar rcs ${NAME} ${OBJS} ${BOUNS_OBJS}
+
+test_bonus:	${NAME} main.c
+						${CC} ${CFLAGS} main.c -L. -lasm -o ${TEST}
+						./${TEST_BONUS}
