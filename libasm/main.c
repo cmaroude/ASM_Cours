@@ -100,14 +100,53 @@ void test_strdup()
 {
     printf("\n=== strdup ===\n");
 
-    char *s1 = strdup("hello");
-    char *s2 = ft_strdup("hello");
+    const char *src = "hello";
+
+    char *s1 = strdup(src);
+    char *s2 = ft_strdup(src);
+
+    char *tmp = strdup(src);
+    printf("%p\n", tmp);
+    free(tmp);
 
     printf("libc: %s\n", s1);
     printf("asm : %s\n", s2);
 
+    // 🔥 TEST strcmp
+    if (strcmp(s1, s2) == 0)
+        printf("strcmp: OK\n");
+    else
+        printf("strcmp: KO\n");
+    
+    printf("[%s] vs [%s]\n", s1, s2);
+    printf("len asm=%zu libc=%zu\n", strlen(s1), strlen(s2));
+    
     free(s1);
     free(s2);
+}
+
+void test_read_full(void)
+{
+    char buf[100];
+    int fd = open("Makefile", O_RDONLY);
+
+    // cas normal
+    errno = 0;
+    ssize_t ret1 = read(fd, buf, 10);
+    buf[ret1] = '\0';
+    lseek(fd, 0, SEEK_SET);
+    ssize_t ret2 = ft_read(fd, buf, 10);
+    buf[ret2] = '\0';
+
+    printf("normal ret: %ld vs %ld\n", ret1, ret2);
+
+    // EOF
+    printf("EOF: %ld\n", ft_read(fd, buf, 10));
+
+    // size = 0
+    printf("size 0: %ld\n", ft_read(fd, buf, 0));
+
+    close(fd);
 }
 
 int main()
@@ -117,6 +156,7 @@ int main()
     test_strcmp();
     test_write();
     test_read();
+    test_read_full();
     test_strdup();
 
     return 0;
