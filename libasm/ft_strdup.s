@@ -9,22 +9,21 @@ section .text
 	global ft_strdup
 
 ft_strdup:
-	mov r8, rdi
-	mov rdi, r8
+	push rdi ; sauvegarde src, rdi = 1er arg
 	call ft_strlen
-	inc rax
+	inc rax ;rajoute +1 pour \0
 	mov rdi, rax
 	call malloc wrt ..plt
 	test rax, rax
 	jz .malloc_failed
-	
+	pop rsi ;recupere src
 	mov rdi, rax
-	mov rsi, r8
 	call ft_strcpy
 	ret
 
 .malloc_failed:
 	call __errno_location wrt ..plt
-	mov dword [rax], 12
-	mov rax, 0
+	mov dword [rax], 12 ; error code 12 ENOMEM out of memory
+	xor rax, rax ;return null
+	add rsp, 8 ; nettoyer le push equ de pop
 	ret

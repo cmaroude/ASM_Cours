@@ -11,10 +11,12 @@ ft_read:
 	test rax, rax
 	jns .done
 	
-	neg rax
+	neg rax ; si syscall echou pour avoir une valeur +
+	mov r8, rax
 	call __errno_location wrt ..plt
-	mov [rax], eax
+	mov [rax], r8d
 	mov rax, -1
+	ret
 
 .done:
 	ret

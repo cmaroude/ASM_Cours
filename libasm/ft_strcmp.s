@@ -4,10 +4,10 @@ section .text
 	global ft_strcmp
 
 ft_strcmp:
-    xor rcx, rcx
+    xor rcx, rcx ; init rcx 0
 
 .loop:
-    movzx eax, byte [rdi +rcx]
+    movzx eax, byte [rdi +rcx] ; passage de 8 a 32 bit
     movzx ebx, byte [rsi + rcx]
     cmp eax, ebx
     jne .diff
