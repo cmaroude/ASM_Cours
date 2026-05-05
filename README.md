@@ -193,8 +193,8 @@ sub rsp, 32
 ```asm
 db 1
 rw 2
- dd 4
- dq 8
+dd 4
+dq 8
 ```
 
 ## BSS (non initialisé)
