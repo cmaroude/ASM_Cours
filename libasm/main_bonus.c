@@ -207,14 +207,59 @@ int main(void)
 
 
     printf("\n=== atoi_base ===\n");
-    printf("%d\n", ft_atoi_base("101", "01")); // 5
-    printf("%d\n", ft_atoi_base("-1A", "0123456789ABCDEF")); // -26
-    printf("%d\n", ft_atoi_base("   +42", "0123456789")); // 42
-    printf("%d\n", ft_atoi_base("zzz", "z")); // 0 (invalid base)
-    printf("39: %d\n", ft_atoi_base("1", "01\v")); // expected: 0
-    printf("40: %d\n", ft_atoi_base("1", "01\f")); // expected: 0
-    printf("41: %d\n", ft_atoi_base("1", "01\r")); // expected: 0
-    printf("42: %d\n", ft_atoi_base("", "01"));     // expected: 0
+    printf("bin 101 (01) = %d (expected 5)\n",
+    ft_atoi_base("101", "01"));
 
+    printf("bin 1111 (01) = %d (expected 15)\n",
+    ft_atoi_base("1111", "01"));
+
+    printf("bin -100 (01) = %d (expected -4)\n",
+    ft_atoi_base("-100", "01"));
+
+    printf("dec 42 (0123456789) = %d (expected 42)\n",
+    ft_atoi_base("42", "0123456789"));
+
+    printf("dec -42 = %d (expected -42)\n",
+    ft_atoi_base("-42", "0123456789"));
+
+    printf("dec +123 = %d (expected 123)\n",
+    ft_atoi_base("   +123", "0123456789"));
+
+    printf("hex 1A = %d (expected 26)\n",
+    ft_atoi_base("1A", "0123456789ABCDEF"));
+
+    printf("hex -FF = %d (expected -255)\n",
+    ft_atoi_base("-FF", "0123456789ABCDEF"));
+
+    printf("hex 10 = %d (expected 16)\n",
+    ft_atoi_base("10", "0123456789ABCDEF"));
+
+    printf("abc abc = %d (expected 5)\n",
+    ft_atoi_base("abc", "abc"));
+
+    printf("abc cab = %d (expected 15)\n",
+    ft_atoi_base("cab", "abc"));
+    
+    printf("ba ba = %d (expected 2)\n",
+    ft_atoi_base("ba", "ba"));
+
+    printf("abba (ab) = %d (expected 6)\n",
+    ft_atoi_base("abba", "ab"));
+
+    printf("empty = %d (expected 0)\n",
+    ft_atoi_base("", "0123456789"));
+
+    printf("invalid base len1 = %d (expected 0)\n",
+    ft_atoi_base("42", "0"));
+
+    printf("invalid +- = %d (expected 0)\n",
+    ft_atoi_base("42", "+-01"));
+
+    printf("whitespace base = %d (expected 0)\n",
+    ft_atoi_base("42", "01\v"));
+
+    printf("stop parsing 42abc = %d (expected 42)\n",
+    ft_atoi_base("42abc", "0123456789"));
+    
     return 0;
 }
