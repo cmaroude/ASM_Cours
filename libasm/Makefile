@@ -9,7 +9,9 @@ OBJS	=	${SRCS:.s=.o}
 
 BONUS_SRCS	=	ft_list_push_front.s \
 							ft_list_size.s \
-							ft_list_remove_if
+							ft_list_remove_if.s \
+							ft_list_sort.s \
+							ft_atoi_base.s
 
 BONUS_OBJS	=	${BONUS_SRCS:.s=.o}
 
@@ -36,7 +38,7 @@ ${NAME}:	${OBJS}
 	${NASM} ${NASMFLAGS} $< -o $@
 
 clean:
-				rm -f ${OBJS}
+				rm -f ${OBJS} ${BONUS_OBJS}
 
 fclean:	clean
 				rm -f ${NAME} ${TEST} ${TEST_BONUS}
@@ -47,9 +49,9 @@ test:	${NAME} main.c
 					${CC} ${CFLAGS} main.c -L. -lasm -o ${TEST}
 					./${TEST} < Makefile
 
-bonus:	${OBJS} ${BOUNS_OBJS}
-				ar rcs ${NAME} ${OBJS} ${BOUNS_OBJS}
+bonus:	${OBJS} ${BONUS_OBJS}
+				ar rcs ${NAME} ${OBJS} ${BONUS_OBJS}
 
-test_bonus:	${NAME} main.c
-						${CC} ${CFLAGS} main.c -L. -lasm -o ${TEST}
+test_bonus:	${NAME} main_bonus.c
+						${CC} ${CFLAGS} main_bonus.c -L. -lasm -o ${TEST_BONUS}
 						./${TEST_BONUS}
