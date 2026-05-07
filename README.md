@@ -1,5 +1,5 @@
 # Cours Complet d'Assembleur x86-64
-## Du niveau zéro à la maîtrise : comprendre le langage machine
+## Du niveau zéro à héro : comprendre le langage machine
 
 ---
 
